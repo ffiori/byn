@@ -51,3 +51,5 @@ bmhs.o: bmhs.c bmhs.h basics.h
 cut.o: cut.c cut.h basics.h
 	$(CC) $(FLAGS) -c cut.c
 
+clean:
+	rm *.o
