@@ -19,6 +19,7 @@ static void build (PartExactB * P, Cut * cut, uchar * pattern, int m, int k, int
         P->u.s.l = cut->len[*i];
     }
     else {                      /* compound */
+
         P->u.l.one = (void *) malloc (sizeof (PartExactB));
         P->u.l.two = (void *) malloc (sizeof (PartExactB));
         build (P->u.l.one, cut, pattern, ver[j / 2] - ver[0], ((j / 2) * k) / j, j / 2, i, ver, 0);
@@ -106,7 +107,6 @@ void freePartExact (PartExact * P)
 
 #define BLK 1024
 
-// Approximate search
 int searchPartExactB (PartExactB * P, register uchar * text, int from, int to, int **matches, int *i, int **pmatches, int *nmatches)
 {
     register int i1, i2;
@@ -203,7 +203,7 @@ int searchPartExactB (PartExactB * P, register uchar * text, int from, int to, i
     }
 }
 
-// performs the exact search of subpatterns, and then the approximate search.
+// performs the exact search
 int searchPartExact (PartExact * P, uchar * text, int from, int to, int *matches)
 {
     int i, j;
@@ -224,15 +224,25 @@ int searchPartExact (PartExact * P, uchar * text, int from, int to, int *matches
     }
 
     // stores exact subpattern matches
-    searchMulti (&P->M, text + from, 0, to - from, lmatches, lcount);   // entra acá (Sunday algorithm)
+    searchMulti (&P->M, text + from, 0, to - from, lmatches, lcount);   // entra 
+    // acá
     for (i = 0; i < P->r * (P->k + 1); i++) {
-        lmatches[i] = (int *) realloc (lmatches[i], lcount[i] * sizeof (int));  // TODO ver qué hay en lmatches
+        lmatches[i] = (int *) realloc (lmatches[i], lcount[i] * sizeof (int));  // TODO 
+        // ver 
+        // qué 
+        // hay 
+        // en 
+        // lmatches
     }
 
     count = 0;
     for (j = 0; j < P->r; j++) {
         i = 0;
-        count += searchPartExactB (P->A + j, text, from, to, NULL, &i, lmatches + j * (P->k + 1), lcount + j * (P->k + 1));  // entra acá, está acá arriba. Debería ser el chequeo con un algoritmo "clásico dinámico"
+        count += searchPartExactB (P->A + j, text, from, to, NULL, &i, lmatches + j * (P->k + 1), lcount + j * (P->k + 1));     // entra 
+        // acá, 
+        // está 
+        // acá 
+        // arriba.
     }
 
     free (lmatches);

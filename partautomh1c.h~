@@ -4,8 +4,10 @@
    allowed without written permission from the authors.
 */
 
+
 #ifndef PARTAUTOMH1CINCLUDED
 #define PARTAUTOMH1CINCLUDED
+
 
 #include "partautom.h"
 
@@ -14,12 +16,13 @@
    X: does not use active columns nor filter
 */
 
-        /* Implementation of horizontal automaton partition (for lc=1).
-           F uses S table. */
 
-int searchPartAutomH1c (PartAutom * M, uchar * text, int from, int to, int *matches);
-int searchFPartAutomH1c (PartAutom * M, uchar * text, int from, int to, int *matches);
-int searchVPartAutomH1c (PartAutom * M, uchar * text, int from, int to, int *matches);
-int searchXPartAutomH1c (PartAutom * M, uchar * text, int from, int to, int *matches);
+	/* Implementation of horizontal automaton partition (for lc=1).
+	   F uses S table. */
+
+int searchPartAutomH1c (PartAutom *M, uchar *text, int from, int to, int *matches);
+int searchFPartAutomH1c (PartAutom *M, uchar *text, int from, int to, int *matches);
+int searchVPartAutomH1c (PartAutom *M, uchar *text, int from, int to, int *matches);
+int searchXPartAutomH1c (PartAutom *M, uchar *text, int from, int to, int *matches);
 
 #endif

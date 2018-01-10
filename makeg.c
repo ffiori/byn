@@ -4,65 +4,64 @@
    allowed without written permission from the authors.
 */
 
-
 /*
  * Construccion de la funcion GoTo.
  */
 
-/* typedef int (*GAutom)[Sigma]; */ /* en el char 0 guarda el Out */
+                                    /* typedef int (*GAutom)[Sigma]; *//* en el char 0 guarda el Out */
 
 int newstate;
 
-void	Enter( GAutom G, uchar *pat, int num, int *lrep )
-   {
-	int	state = 0,
-		j;
-	/*
-	 * Avanzamos en el automata segun el patron.
-	 */
+void Enter (GAutom G, uchar * pat, int num, int *lrep)
+{
+    int state = 0, j;
 
-	for ( j = 0; pat[j] && (G[state][pat[j]] != -1); j++ )
-	     state = G[state][pat[j]];
+    /*
+     * Avanzamos en el automata segun el patron.
+     */
 
-	/*
-	 * Insertamos solo si no existia este patron.
-	 */
+    for (j = 0; pat[j] && (G[state][pat[j]] != -1); j++)
+        state = G[state][pat[j]];
 
-	while (pat[j])
-	   {
-	     G[state][pat[j++]] = ++newstate;
-	     state = newstate;
-	   }
-	*lrep = G[state][0]; G[state][0] = num;
-   }
+    /*
+     * Insertamos solo si no existia este patron.
+     */
 
-GAutom	MakeG(uchar **Ps, int jj, int m, int *lrep)
-   {
-	int	i, j;
-        GAutom G = (GAutom) malloc ((m+1)*sizeof(*G));
+    while (pat[j]) {
+        G[state][pat[j++]] = ++newstate;
+        state = newstate;
+    }
+    *lrep = G[state][0];
+    G[state][0] = num;
+}
 
-        newstate = 0;  /* here, to allow reuse! */
+GAutom MakeG (uchar ** Ps, int jj, int m, int *lrep)
+{
+    int i, j;
+    GAutom G = (GAutom) malloc ((m + 1) * sizeof (*G));
 
-	for ( i = 0; i <= m; i++ )
-	   { G[i][0] = -1;
-	     for ( j = 1; j < Sigma; j++ )
-		  G[i][j] = -1;
-	   }
+    newstate = 0;               /* here, to allow reuse! */
 
-	for ( i = 0; i < jj; i++ )
-	     Enter(G,Ps[i],i,&lrep[i]);
+    for (i = 0; i <= m; i++) {
+        G[i][0] = -1;
+        for (j = 1; j < Sigma; j++)
+            G[i][j] = -1;
+    }
 
-	/* ommited, since we use it as a trie
-	for ( i = 1; i < Sigma; i++ )
-	     if (G[0][i] == -1) G[0][i] = 0;
-	*/
+    for (i = 0; i < jj; i++)
+        Enter (G, Ps[i], i, &lrep[i]);
 
-	   /* character mapping */
-	for ( i = 0; i <= m; i++ )
-	   { for ( j = 1; j < Sigma; j++ )
-		  if (j != Map[j]) G[i][j] = G[i][Map[j]];
-	   }
+    /* ommited, since we use it as a trie
+       for ( i = 1; i < Sigma; i++ )
+       if (G[0][i] == -1) G[0][i] = 0;
+     */
 
-	return G;
-   }
+    /* character mapping */
+    for (i = 0; i <= m; i++) {
+        for (j = 1; j < Sigma; j++)
+            if (j != Map[j])
+                G[i][j] = G[i][Map[j]];
+    }
 
+    return G;
+}

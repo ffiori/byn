@@ -4,19 +4,16 @@
    allowed without written permission from the authors.
 */
 
-
 #ifndef PARTAUTOMVINCLUDED
 #define PARTAUTOMVINCLUDED
 
-
 #include "partautom.h"
 
+        /* Implementation of vertical automaton partition.
+           F uses S table */
 
-	/* Implementation of vertical automaton partition.
-	   F uses S table */
-
-int searchPartAutomV (PartAutom *M, uchar *text, int from, int to, int *matches);
-int searchFPartAutomV (PartAutom *M, uchar *text, int from, int to, int *matches);
-int searchVPartAutomV (PartAutom *M, uchar *text, int from, int to, int *matches);
+int searchPartAutomV (PartAutom * M, uchar * text, int from, int to, int *matches);
+int searchFPartAutomV (PartAutom * M, uchar * text, int from, int to, int *matches);
+int searchVPartAutomV (PartAutom * M, uchar * text, int from, int to, int *matches);
 
 #endif
