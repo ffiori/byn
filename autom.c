@@ -105,23 +105,23 @@ int searchAutom (PartAutom * A, register uchar * text, int from, int to, int *ma
     return count;
 }
 
-//TODO debuguear y ver from y to para saber si ya se hizo o no la busqueda exacta
+//TODO debuguear
 int searchVAutom (PartAutom * A, register uchar * text, int from, int to, int *matches)
 {
     register mask x;
-    register mask *T = A->T.d1[0];
+    register mask *T = A->T.d1[0]; //T['a']=0, T[otra cosa]=219
     register mask D = A->D.d0;
     register mask Din = A->Din;
     register mask m2 = A->msk[2];
     register mask m1 = A->msk[1];
-    register mask m3 = m1 | m2;
-    register mask G = A->Glast.d0;
-    register int p0 = A->p[0];
-    register int p3 = A->p[3];
+    register mask m3 = m1 | m2; //no se usa
+    register mask G = A->Glast.d0; //OK
+    register int p0 = A->p[0]; //OK
+    register int p3 = A->p[3]; //no se usa
     register int n = from;
     int count = 0;
 
-//printf("from %9d to %9d. diff %d\n",from,to,to-from);
+printf("searchVAutom() from %d to %d. diff %d\n",from,to,to-from);
     /* k=m-1 not solved with this automaton */
     if (A->k == A->m - 1)
         return search1matchV (A->S, text, from, to, matches);
@@ -135,17 +135,17 @@ int searchVAutom (PartAutom * A, register uchar * text, int from, int to, int *m
             //((D << p3) | m3) & //represents insertions of chars in pattern
             (((x + m1) ^ x) >> 1) &     //match
             Din;
-        if (!(D & G)) {         /* found *//* clear the last diagonal */
-            D |= m2;
+        if (!(D & G)) {         /* found */
+            D |= m2; /* clear the last diagonal */
             /* fill match */
             if (n > 0) {
                 if (matches != NULL)
                     matches[count] = n;
-                if (n != last + 1)
+                //~ if (n != last + 1) //por qué este if ?? TODO
                     count++;
 
                 last = n;
-                //printf("found %d\n",n);
+                printf("found %d\n",n);
             }
         }
     }

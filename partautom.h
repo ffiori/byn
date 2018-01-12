@@ -72,8 +72,7 @@ void initPartAutom (PartAutom * M);
 
 void freePartAutom (PartAutom * M);
 
-        /* searches with M on text[from..to-1], filling matches at positions>=0.
-         */
+        /* searches with M on text[from..to-1], filling matches at positions>=0. */
 
 #define searchPartAutom(M,text,from,to,matches) \
 	(M)->search (M,text,from,to,matches)

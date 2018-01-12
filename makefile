@@ -52,4 +52,4 @@ cut.o: cut.c cut.h basics.h
 	$(CC) $(FLAGS) -c cut.c
 
 clean:
-	rm *.o
+	rm lsearch *.o
