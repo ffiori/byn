@@ -6,6 +6,18 @@
 
 #include "autom.h"
 
+void printbin(mask x, int pos)
+{
+	if(pos<=0) {return;}
+	
+	printbin(x>>1,pos-1);
+	printf("%d",x&1);
+	
+	if(pos==sizeof(x)*8) printf("\n");
+}
+
+#define printbin(x) printbin((x),sizeof(x)*8)
+
         /* searches from text with automaton A. */
 
 int searchFAutom (PartAutom * A, register uchar * text, int from, int to, int *matches)
@@ -112,16 +124,19 @@ int searchVAutom (PartAutom * A, register uchar * text, int from, int to, int *m
     register mask *T = A->T.d1[0]; //T['a']=0, T[otra cosa]=219
     register mask D = A->D.d0;
     register mask Din = A->Din;
-    register mask m2 = A->msk[2];
-    register mask m1 = A->msk[1];
+    register mask m2 = A->msk[2]; // 0..0(1)^(k+1)
+    register mask m1 = A->msk[1]; // 0..010..010...
     register mask m3 = m1 | m2; //no se usa
-    register mask G = A->Glast.d0; //OK
-    register int p0 = A->p[0]; //OK
+    register mask G = A->Glast.d0; //OK 1<<k
+    register int p0 = A->p[0]; //OK = k+2
     register int p3 = A->p[3]; //no se usa
     register int n = from;
     int count = 0;
 
-printf("searchVAutom() from %d to %d. diff %d\n",from,to,to-from);
+printf("searchVAutom() from %d to %d. diff %d. p0: %d, G: %d\n",from,to,to-from,p0,G);
+printf("m1: "); printbin(m1);
+printf("m2: "); printbin(m2);
+
     /* k=m-1 not solved with this automaton */
     if (A->k == A->m - 1)
         return search1matchV (A->S, text, from, to, matches);
@@ -130,11 +145,36 @@ printf("searchVAutom() from %d to %d. diff %d\n",from,to,to-from);
     int last = -100;
 
     while (n < to) {
-        x = (D >> p0) | T[text[n++]];
+		printf("\nEstoy en n=%d:\n",n);
+        
+        #if 1
+        
+        mask Toriginal = T[text[n++]];
+        mask Tnow = ((D >> p0) + m1) & Toriginal;
+        
+        int shift = (A->m - A->k - 1) * (A->k + 2);
+        Tnow |= (Toriginal >> shift) << shift; //Mr Versace
+        
+        printf("T[%c]\t",text[n-1]); printbin(Toriginal);
+        
+        #else
+        
+        mask Tnow = T[text[n++]];
+        
+        #endif
+        
+        x = (D >> p0) | Tnow;
+        
         D = ((D << 1) | m1) &   //mismatch
             //((D << p3) | m3) & //represents insertions of chars in pattern
-            (((x + m1) ^ x) >> 1) &     //match
-            Din;
+            
+            (((x + m1) ^ x) >> 1) &     // matches and deletions. TODO work on this!!
+            
+            Din; //máscara que tiene 0s como separadores
+        
+        printf("Tnow\t"); printbin(Tnow);
+        printf("D\t"); printbin(D);
+        
         if (!(D & G)) {         /* found */
             D |= m2; /* clear the last diagonal */
             /* fill match */
@@ -145,7 +185,7 @@ printf("searchVAutom() from %d to %d. diff %d\n",from,to,to-from);
                     count++;
 
                 last = n;
-                printf("found %d\n",n);
+                printf("found %d\n",n-1);
             }
         }
     }

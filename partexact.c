@@ -217,7 +217,7 @@ int searchPartExactB (PartExactB * P, register uchar * text, int from, int to, i
             
             //~ printf("searchPartExactB(): llamo a searchPartAutom con ff: %d, tt: %d, nmatches=%d,%d\n",ff,tt,nmatches[0],nmatches[1]);
             //~ count += searchPartAutom (&P->dynaut, text, ff, tt, matches ? (*matches) + count : NULL); // entra acá, ver "partautom.h", hay un define (por ahora me lleva a searchVAutom en "autom.c")
-            count += searchPartAutom (&P->dynaut, text, 0, 17, matches ? (*matches) + count : NULL); // entra acá, ver "partautom.h", hay un define (por ahora me lleva a searchVAutom en "autom.c")
+            count += searchPartAutom (&P->dynaut, text, 0, 16, matches ? (*matches) + count : NULL); // entra acá, ver "partautom.h", hay un define (por ahora me lleva a searchVAutom en "autom.c")
             
             ff = nff;
         }
