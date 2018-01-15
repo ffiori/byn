@@ -117,6 +117,8 @@ int searchAutom (PartAutom * A, register uchar * text, int from, int to, int *ma
     return count;
 }
 
+#define DEBUG 0
+
 //TODO debuguear
 int searchVAutom (PartAutom * A, register uchar * text, int from, int to, int *matches)
 {
@@ -133,9 +135,11 @@ int searchVAutom (PartAutom * A, register uchar * text, int from, int to, int *m
     register int n = from;
     int count = 0;
 
+#if DEBUG
 printf("searchVAutom() from %d to %d. diff %d. p0: %d, G: %d\n",from,to,to-from,p0,G);
 printf("m1: "); printbin(m1);
 printf("m2: "); printbin(m2);
+#endif
 
     /* k=m-1 not solved with this automaton */
     if (A->k == A->m - 1)
@@ -145,9 +149,9 @@ printf("m2: "); printbin(m2);
     int last = -100;
 
     while (n < to) {
-		printf("\nEstoy en n=%d:\n",n);
+		#if DEBUG
         
-        #if 1
+        printf("\nEstoy en n=%d:\n",n);
         
         mask Toriginal = T[text[n++]];
         mask Tnow = ((D >> p0) + m1) & Toriginal;
@@ -156,6 +160,9 @@ printf("m2: "); printbin(m2);
         Tnow |= (Toriginal >> shift) << shift; //Mr Versace
         
         printf("T[%c]\t",text[n-1]); printbin(Toriginal);
+		printf("Tnow\t"); printbin(Tnow);
+        printf("D\t"); printbin(D);
+        //~ printf("mask\t",text[n-1]); printbin(m2<<shift);
         
         #else
         
@@ -165,23 +172,25 @@ printf("m2: "); printbin(m2);
         
         x = (D >> p0) | Tnow;
         
-        D = ((D << 1) | m1) &   //mismatch
-            //((D << p3) | m3) & //represents insertions of chars in pattern
+        D = ((D << 1) | m1) &   //mismatch (suma 1)
+            ((D << p3) | m3) & //represents insertions of chars in pattern
             
-            (((x + m1) ^ x) >> 1) &     // matches and deletions. TODO work on this!!
+            (((x + m1) ^ x) >> 1) &     // matches and deletions. TODO work on this!! (suma 1 o mantiene igual)
             
             Din; //máscara que tiene 0s como separadores
         
-        printf("Tnow\t"); printbin(Tnow);
-        printf("D\t"); printbin(D);
+        #if DEBUG
+        printf("x\t"); printbin(x);
+        printf("D after\t"); printbin(D);
+        #endif
         
         if (!(D & G)) {         /* found */
             D |= m2; /* clear the last diagonal */
             /* fill match */
-            if (n > 0) {
+            if (n > 0) { //capaz >=m
                 if (matches != NULL)
                     matches[count] = n;
-                //~ if (n != last + 1) //por qué este if ?? TODO
+                if (n != last + 1) //por qué este if ?? TODO
                     count++;
 
                 last = n;
