@@ -118,8 +118,8 @@ static void buildTmask (uchar ** pattern, int np, PartAutom * M)
     /* fill cells */
     for (j = 0; j <= M->J; j++)
         for (i = 0; i <= M->I; i++) {
-            buildTsection (pattern, np, i * (M->lr) + j * (M->lc), i < M->I ? M->lr : (M->k + 1) - M->I * (M->lr), j < M->J ? M->lc : (M->m - M->k) - M->J * (M->lc), M->lr, M->lc,
-                           (M->I && M->J) ? M->T.d2[j][i] : M->T.d1[i + j], M->Din);
+            buildTsection (pattern, np, i * (M->lr) + j * (M->lc), i < M->I ? M->lr : (M->k + 1) - M->I * (M->lr), j < M->J ? M->lc : (M->m - M->k) - M->J * (M->lc),
+							M->lr, M->lc, (M->I && M->J) ? M->T.d2[j][i] : M->T.d1[i + j], M->Din);
         }
 }
 
@@ -281,7 +281,7 @@ double estimatePartAutom (int m, int k, int c, int np)
 }
 
         /* does the preprocessing to search "pattern" by automaton
-           partitioning. only pattern[0..m-1] si considered, and k
+           partitioning. only pattern[0..m-1] is considered, and k
            is the number of errors */
 
 void prepSPartAutom (PartAutom * M, uchar ** pattern, int np, int k, int c, bool V)
@@ -375,13 +375,13 @@ void prepSPartAutom (PartAutom * M, uchar ** pattern, int np, int k, int c, bool
             if (M->lc > 1)
                 M->search = NULL;       /* never happens, searchPartAutomHV */
             else
-                M->search = V ? searchVPartAutomHV1c : (!active ? searchXPartAutomHV1c : (useS ? searchFPartAutomHV1c : searchPartAutomHV1c)), puts ("1");
+                M->search = V ? searchVPartAutomHV1c : (!active ? searchXPartAutomHV1c : (useS ? searchFPartAutomHV1c : searchPartAutomHV1c)), puts ("1fff");
         else if (M->lc > 1)
-            M->search = V ? searchVPartAutomH : (!active ? searchXPartAutomH : (useS ? searchFPartAutomH : searchPartAutomH)), puts ("2");
+            M->search = V ? searchVPartAutomH : (!active ? searchXPartAutomH : (useS ? searchFPartAutomH : searchPartAutomH)), puts ("2fff");
         else
-            M->search = V ? searchVPartAutomH1c : (!active ? searchXPartAutomH1c : (useS ? searchFPartAutomH1c : searchPartAutomH1c)), puts ("3");
+            M->search = V ? searchVPartAutomH1c : (!active ? searchXPartAutomH1c : (useS ? searchFPartAutomH1c : searchPartAutomH1c)), puts ("3fff");
     else if (M->I)
-        M->search = V ? searchVPartAutomV : (useS ? searchFPartAutomV : searchFPartAutomV), puts ("4");
+        M->search = V ? searchVPartAutomV : (useS ? searchFPartAutomV : searchFPartAutomV), puts ("4fff");
     else
         M->search = V ? searchVAutom : (dontuseSForce ? searchAutom : searchFAutom)
             //, printf("5 V %d, dontuseSForce %d\n",V,dontuseSForce)

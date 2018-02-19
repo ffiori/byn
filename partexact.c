@@ -53,9 +53,10 @@ void prepPartExact (PartExact * P, uchar ** pattern, int r, int m, int k)
     /*
      * prepare for multipattern search 
      */
-    prepMulti (&P->M, cut.ps, r * (k + 1));
+    prepMulti (&P->M, cut.ps, r * (k + 1)); //preprocesa todos los patrones y subpatrones que salen del cut (para la hierarchical verification)
     freeCut (&cut);
-
+    
+    //TODO qué carajo es un subproblem???
     /*
      * Initialize subproblems 
      */
@@ -116,15 +117,10 @@ void freePartExact (PartExact * P)
 
 
 
-
-
-
 #define BLK 1024
 
-#if (!DEBUG)
-
 // Approximate search
-// pmatches y nmatches se usan para calcular ff y tt (from y to) para llamar a la función de búsqueda aproximada en ese rango. (Hay otra cosa que no anda porque pongo ff=0 tt=17 y tampoco anda, debe ser la función de búsqueda aproximada)
+// pmatches y nmatches se usan para calcular ff y tt (from y to) para llamar a la función de búsqueda aproximada en ese rango.
 int searchPartExactB (PartExactB * P, register uchar * text, int from, int to, int **matches, int *i, int **pmatches, int *nmatches)
 {
     register int i1, i2;
@@ -215,9 +211,9 @@ int searchPartExactB (PartExactB * P, register uchar * text, int from, int to, i
             if (matches && ((count + (tt - ff) + BLK - 1) / BLK > (count + BLK - 1) / BLK))
                 *matches = realloc (*matches, sizeof (int) * ((count + (tt - ff) + BLK - 1) / BLK) * BLK);
             
-            //~ printf("searchPartExactB(): llamo a searchPartAutom con ff: %d, tt: %d, nmatches=%d,%d\n",ff,tt,nmatches[0],nmatches[1]);
-            //~ count += searchPartAutom (&P->dynaut, text, ff, tt, matches ? (*matches) + count : NULL); // entra acá, ver "partautom.h", hay un define (por ahora me lleva a searchVAutom en "autom.c")
-            count += searchPartAutom (&P->dynaut, text, 0, 16, matches ? (*matches) + count : NULL); // entra acá, ver "partautom.h", hay un define (por ahora me lleva a searchVAutom en "autom.c")
+            printf("searchPartExactB(): llamo a searchPartAutom con ff: %d, tt: %d, nmatches=%d,%d\n",ff,tt,nmatches[0],nmatches[1]);
+            count += searchPartAutom (&P->dynaut, text, ff, tt, matches ? (*matches) + count : NULL); // entra acá, ver "partautom.h", hay un define (por ahora me lleva a searchVAutom en "autom.c")
+            //~ count += searchPartAutom (&P->dynaut, text, 0, 16, matches ? (*matches) + count : NULL); // entra acá, ver "partautom.h", hay un define (por ahora me lleva a searchVAutom en "autom.c")
             
             ff = nff;
         }
@@ -226,121 +222,6 @@ int searchPartExactB (PartExactB * P, register uchar * text, int from, int to, i
         return count;
     }
 }
-
-#endif
-
-#if DEBUG
-
-int searchPartAutomDEBUG()
-
-
-
-int searchPartExactB (PartExactB * P, register uchar * text, int from, int to, int **matches, int *i, int **pmatches, int *nmatches, int npat)
-{
-    register int i1, i2;
-    int *m1, *m2;
-    register int c1, c2;
-    register int o1, o2;
-    register int nff, ff, ff1, ff2, tt;
-    register int mPk = P->m + P->k;
-    int count = 0;
-    
-    uchar *pattern = pattGLOBAL[npat];
-
-    if (P->large) {             /* integrate subsearches */
-        if (P->u.l.one->large) {
-            m1 = NULL;
-            c1 = searchPartExactB (P->u.l.one, text + from, 0, to - from, &m1, i, pmatches, nmatches, npat);
-            m1 = (int *) realloc (m1, c1 * sizeof (int));
-        }
-        else {
-            m1 = pmatches[*i];
-            c1 = nmatches[*i];
-            (*i)++;
-        }
-        if (P->u.l.two->large) {
-            m2 = NULL;
-            c2 = searchPartExactB (P->u.l.two, text + from, 0, to - from, &m2, i, pmatches, nmatches, npat);
-            m2 = (int *) realloc (m2, c2 * sizeof (int));
-        }
-        else {
-            m2 = pmatches[*i];
-            c2 = nmatches[*i];
-            (*i)++;
-        }
-        o1 = P->u.l.one->offset - from;
-        o2 = P->u.l.two->offset - from;
-        i1 = 0;
-        if (i1 < c1)
-            ff1 = m1[i1++] - o1;
-        else
-            ff1 = to + 1;
-        i2 = 0;
-        if (i2 < c2)
-            ff2 = m2[i2++] - o2;
-        else
-            ff2 = to + 1;
-        if (ff1 < ff2) {
-            ff = ff1;
-            if (i1 < c1)
-                ff1 = m1[i1++] - o1;
-            else
-                ff1 = to + 1;
-        }
-        else {
-            ff = ff2;
-            if (i2 < c2)
-                ff2 = m2[i2++] - o2;
-            else
-                ff2 = to + 1;
-        }
-        while (ff <= to) {
-            tt = ff + mPk;
-            if (tt > to)
-                tt = to;
-                
-            while (true) {
-                if (ff1 < ff2) {
-                    nff = ff1;
-                    if (i1 < c1)
-                        ff1 = m1[i1++] - o1;
-                    else
-                        ff1 = to + 1;
-                }
-                else {
-                    nff = ff2;
-                    if (i2 < c2)
-                        ff2 = m2[i2++] - o2;
-                    else
-                        ff2 = to + 1;
-                }
-                if (nff <= tt) {
-                    tt = nff + mPk;
-                    if (tt > to)
-                        tt = to;
-                }
-                else
-                    break;
-            }
-            
-            initPartAutom (&P->dynaut);
-            if (matches && ((count + (tt - ff) + BLK - 1) / BLK > (count + BLK - 1) / BLK))
-                *matches = realloc (*matches, sizeof (int) * ((count + (tt - ff) + BLK - 1) / BLK) * BLK);
-            
-            //~ count += searchPartAutom (&P->dynaut, text, ff, tt, matches ? (*matches) + count : NULL); // entra acá, ver "partautom.h", hay un define
-            count += searchPartAutomDEBUG (&P->dynaut, text, ff, tt, matches ? (*matches) + count : NULL, pattern); // entra acá, ver "partautom.h", hay un define
-            
-            ff = nff;
-        }
-        free (m1);
-        free (m2);
-        return count;
-    }
-}
-
-#endif
-
-
 
 // performs the exact search of subpatterns, and then the approximate search.
 int searchPartExact (PartExact * P, uchar * text, int from, int to, int *matches)
@@ -366,19 +247,24 @@ int searchPartExact (PartExact * P, uchar * text, int from, int to, int *matches
     searchMulti (&P->M, text + from, 0, to - from, lmatches, lcount);   // entra acá (Sunday algorithm)
     for (i = 0; i < P->r * (P->k + 1); i++) {
         lmatches[i] = (int *) realloc (lmatches[i], lcount[i] * sizeof (int)); //ajusta los tamaños de lmatches para cada pattern (why tho?)
-    } // TODO ver qué hay en lmatches
+    } // en lmatches[i]=j se encontró al subpattern i terminando en la pos j no incluida ...,j). OJO busca subpatrones.
 
     count = 0;
     for (j = 0; j < P->r; j++) {
         i = 0;
-        #if DEBUG
-        count += searchPartExactB (P->A + j, text, from, to, NULL, &i, lmatches + j * (P->k + 1), lcount + j * (P->k + 1), j);
-        #else
         count += searchPartExactB (P->A + j, text, from, to, NULL, &i, lmatches + j * (P->k + 1), lcount + j * (P->k + 1));  // entra acá, está acá arriba. Debería ser el chequeo con un algoritmo "clásico"
-        #endif
     }
 
     free (lmatches);
     free (lcount);
     return count;
 }
+
+#if 0
+typedef struct{
+    Multi M;                    /* multipattern search */
+    int k;                      /* nr of errors */
+    int r;                      /* nr of patterns */
+    PartExactB *A;              /* hierarchical verification */
+} PartExact;                    /* partitioning into exact search */
+#endif
