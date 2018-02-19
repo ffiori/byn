@@ -9,7 +9,10 @@
 #include "cut.h"
 
 #define DEBUG 0
-
+/*
+* Arma para la hierarchical verification en base a cut
+* se llama con build(P->A + j, &cut, pattern[j], m, k, k + 1, &i, ver, 0);
+*/
 static void build (PartExactB * P, Cut * cut, uchar * pattern, int m, int k, int j, int *i, int *ver, int offset)
 {
     P->m = m;
@@ -17,14 +20,14 @@ static void build (PartExactB * P, Cut * cut, uchar * pattern, int m, int k, int
     P->large = (j > 1);
     P->offset = m + k + offset;
     prepPartAutom (&P->dynaut, pattern + ver[0], m, k, 1, true);
-    if (!P->large) {            /* simple */
+    if (!P->large) {            /* simple, cuando k=0 */
         P->u.s.l = cut->len[*i];
     }
     else {                      /* compound */
         P->u.l.one = (void *) malloc (sizeof (PartExactB));
         P->u.l.two = (void *) malloc (sizeof (PartExactB));
-        build (P->u.l.one, cut, pattern, ver[j / 2] - ver[0], ((j / 2) * k) / j, j / 2, i, ver, 0);
-        build (P->u.l.two, cut, pattern, ver[j] - ver[j / 2], ((j - j / 2) * k) / j, j - j / 2, i, ver + j / 2, ver[j / 2] - ver[0]);
+        build (P->u.l.one, cut, pattern, ver[j/2] - ver[0],     ((j/2)*k)/j,     j/2, i,       ver,                 0);
+        build (P->u.l.two, cut, pattern, ver[j] - ver[j/2], ((j - j/2)*k)/j, j - j/2, i, ver + j/2, ver[j/2] - ver[0]);
     }
 }
 
@@ -56,9 +59,9 @@ void prepPartExact (PartExact * P, uchar ** pattern, int r, int m, int k)
     prepMulti (&P->M, cut.ps, r * (k + 1)); //preprocesa todos los patrones y subpatrones que salen del cut (para la hierarchical verification)
     freeCut (&cut);
     
-    //TODO qué carajo es un subproblem???
     /*
-     * Initialize subproblems 
+     * Initialize subproblems
+     * Para cada patrón hace cut y build, arma la hierarchical verification en P->A + j
      */
     ver = (int *) malloc ((k + 2) * sizeof (int));
     P->A = malloc (r * sizeof (PartExactB));
@@ -254,6 +257,10 @@ int searchPartExact (PartExact * P, uchar * text, int from, int to, int *matches
         i = 0;
         count += searchPartExactB (P->A + j, text, from, to, NULL, &i, lmatches + j * (P->k + 1), lcount + j * (P->k + 1));  // entra acá, está acá arriba. Debería ser el chequeo con un algoritmo "clásico"
     }
+    /*
+     * Le pasa a SearchPartExactB la fila de lmatches y lcount correspondiente al pattern j
+     * P->A + j: PartExactB del pattern j (hierarchical verification)
+     * */
 
     free (lmatches);
     free (lcount);

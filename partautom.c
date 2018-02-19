@@ -304,7 +304,7 @@ void prepSPartAutom (PartAutom * M, uchar ** pattern, int np, int k, int c, bool
     M->m = m;
     M->k = k;
 
-    /* I = celing((k+1)/(w-1))
+    /* I = ceiling((k+1)/(w-1))
        lr = ceiling ((k+1)/I)
        lc = floor (w/(lr+1))
        J = ceiling ((m-k)/lc) */
