@@ -126,13 +126,13 @@ typedef unsigned long word;
 static int B; /* number of bits per state */
 static word lim, ovmask, MASK, T[256];
 
-/* ceil(log2(x)) */
-int clog2(size_t x)
-{
-    int i;
-    for (i = 0; ((size_t)1 << i) < x; i++);
-    return i;
-}
+//~ /* ceil(log2(x)) */
+//~ int clog2(size_t x)
+//~ {
+    //~ int i;
+    //~ for (i = 0; ((size_t)1 << i) < x; i++);
+    //~ return i;
+//~ }
 
 void prep(unsigned char *pat, size_t m, size_t k)
 {
@@ -158,20 +158,20 @@ void prep(unsigned char *pat, size_t m, size_t k)
     MASK = (m*B == W) ? ~(word)0 : i-1;
 }
 
-size_t exec(unsigned char *text, size_t n, size_t k)
+size_t exec(unsigned char *text, size_t n, PartAutom *M)
 {
     word state, overflow;
     size_t i, occ = 0;
 
-    state = MASK & ~ovmask;
-    overflow = ovmask;
+    state = M->MASK & ~M->ovmask;
+    overflow = M->ovmask;
 
     occ = 0;
     for (i = 0; i < n; i++) {
-        state = ((state << B) + T[text[i]]) & MASK;
-        overflow = ((overflow << B) | (state & ovmask)) & MASK;
-        state &= ~ovmask;
-        if ((state + overflow) < lim) {
+        state = ((state << M->B) + M->TSA[text[i]]) & M->MASK;
+        overflow = ((overflow << M->B) | (state & M->ovmask)) & M->MASK;
+        state &= ~M->ovmask;
+        if ((state + overflow) < M->lim) {
             /* match at T[i-m+1..i] */
             occ++;
         }
@@ -185,7 +185,7 @@ size_t exec(unsigned char *text, size_t n, size_t k)
 
 
 
-#define DEBUG 1
+#define DEBUG 0
 
 int searchVAutom (PartAutom * A, register uchar * text, int from, int to, int *matches)
 {
@@ -201,24 +201,23 @@ int searchVAutom (PartAutom * A, register uchar * text, int from, int to, int *m
     register int p3 = A->p[3]; //no se usa
     register int n = from;
     int count = 0;
-	int k = p0-2; //WTF
-	
-	
+    
+	//~ int k = p0-2; //WTF
+		
 #if DEBUG
 printf("searchVAutom() from %d to %d. diff %d. p0: %d, G: %d\n",from,to,to-from,p0,G);
-printf("m1: "); printbin(m1);
-printf("m2: "); printbin(m2);
+//~ printf("m1: "); printbin(m1);
+//~ printf("m2: "); printbin(m2);
+printbin(A->MASK);
+printbin(A->ovmask);
+printbin(A->TSA['a']);
+printbin(A->TSA['b']);
 #endif
 	
-	prep("aaaa",4,k);
+	//~ prep("aaaa",4,k);
 	
-	printbin(MASK);
-	printbin(ovmask);
-	printbin(T['a']);
-	printbin(T['b']);
-	
-	count = exec(text+from, to-from, k); 
-	printf("count: %d\n",count);
+	count = exec(text+from, to-from, A); //creo que el +1 sobra
+	//~ printf("count: %d\n",count);
 	return count;
 }
 

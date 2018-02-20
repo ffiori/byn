@@ -50,6 +50,11 @@ typedef struct
         mask d0;                /* mask  to analyze all rows */
     } Gany;
     Tsearcher search;           /* searching procedure */
+    
+        
+    //Shift Add
+    int B; /* number of bits per state */
+	mask lim, ovmask, MASK, TSA[256]; //mask=word
 } PartAutom;                    /* partitioned automaton for a problem */
 
         /* does the preprocessing to search "pattern" by automaton

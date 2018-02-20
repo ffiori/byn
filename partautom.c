@@ -90,6 +90,47 @@ static void buildTsection (uchar ** pattern, int np, int offs, int rows, int col
             T[c] = T[Map[c]];
 }
 
+
+//Shift Add begin
+
+#define W (8 * (int)sizeof(mask))
+/* ceil(log2(x)) */
+int clog2(size_t x)
+{
+    int i;
+    for (i = 0; ((size_t)1 << i) < x; i++);
+    return i;
+}
+
+void prepSA(unsigned char *pat, PartAutom *M)
+{
+    size_t i,m,k;
+    m = M->m;
+    k = M->k;
+
+    M->B = clog2(k+1) + 1;
+    if (m*M->B > W) {
+        fprintf(stderr, "need m*M->B=%lu > %d=W bits\n", (unsigned long)(m*M->B), W);
+        exit(42);
+    }
+
+    M->lim = (mask)k << (m-1)*M->B;
+    M->ovmask = 0;
+    for (i = 1; i <= m; i++)
+        M->ovmask = (M->ovmask << M->B) | ((mask)1 << (M->B-1));
+    M->lim += (mask)1 << (m-1)*M->B;
+    for (i=0; i < 256; i++) M->TSA[i] = M->ovmask >> (M->B-1);
+    for (i = 1; *pat != '\0'; i <<= M->B) {
+        M->TSA[*pat] &= ~i;
+        pat++;
+    }
+
+    M->MASK = (m*M->B == W) ? ~(mask)0 : i-1;
+}
+
+//Shift Add end
+
+
 static void buildTmask (uchar ** pattern, int np, PartAutom * M)
 
         /* builds the T table for pattern "pattern" and problem M.
@@ -347,6 +388,7 @@ void prepSPartAutom (PartAutom * M, uchar ** pattern, int np, int k, int c, bool
     }
 
     /* compute T, D and some values */
+    prepSA(pattern[0], M);
     buildTmask (pattern, np, M);
     buildD (M);
 
@@ -473,6 +515,7 @@ void freePartAutom (PartAutom * M)
 
 int search1match (bool * S, register uchar * text, int from, int to, int *matches)
 {
+	printf("Entered search1Match, from %d, to %d\n",from,to);
     register int n = from;
     register int count = 0;
 
@@ -491,6 +534,7 @@ int search1match (bool * S, register uchar * text, int from, int to, int *matche
 
 int search1matchV (bool * S, register uchar * text, int from, int to, int *matches)
 {
+	printf("Entered search1MatchV, from %d, to %d\n",from,to);
     register int n = from;
     register int count = 0;
 

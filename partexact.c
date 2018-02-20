@@ -214,8 +214,10 @@ int searchPartExactB (PartExactB * P, register uchar * text, int from, int to, i
             if (matches && ((count + (tt - ff) + BLK - 1) / BLK > (count + BLK - 1) / BLK))
                 *matches = realloc (*matches, sizeof (int) * ((count + (tt - ff) + BLK - 1) / BLK) * BLK);
             
-            printf("searchPartExactB(): llamo a searchPartAutom con ff: %d, tt: %d, nmatches=%d,%d\n",ff,tt,nmatches[0],nmatches[1]);
-            count += searchPartAutom (&P->dynaut, text, ff, tt, matches ? (*matches) + count : NULL); // entra acá, ver "partautom.h", hay un define (por ahora me lleva a searchVAutom en "autom.c")
+            int fefooffset = P->k; //Fruta TODO
+            
+            //~ printf("searchPartExactB(): llamo a searchPartAutom con ff: %d, tt: %d, nmatches=%d,%d,%d\n",ff,tt,nmatches[0],nmatches[1],nmatches[2]);
+            count += searchPartAutom (&P->dynaut, text, ff-fefooffset, tt, matches ? (*matches) + count : NULL); // entra acá, ver "partautom.h", hay un define (por ahora me lleva a searchVAutom en "autom.c")
             //~ count += searchPartAutom (&P->dynaut, text, 0, 16, matches ? (*matches) + count : NULL); // entra acá, ver "partautom.h", hay un define (por ahora me lleva a searchVAutom en "autom.c")
             
             ff = nff;
@@ -225,6 +227,7 @@ int searchPartExactB (PartExactB * P, register uchar * text, int from, int to, i
         return count;
     }
 }
+//TODO ver cómo calcula from y to!!!
 
 // performs the exact search of subpatterns, and then the approximate search.
 int searchPartExact (PartExact * P, uchar * text, int from, int to, int *matches)
