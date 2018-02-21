@@ -134,31 +134,31 @@ static word lim, ovmask, MASK, T[256];
     //~ return i;
 //~ }
 
-void prep(unsigned char *pat, size_t m, size_t k)
-{
-    size_t i;
+//~ void prep(unsigned char *pat, size_t m, size_t k)
+//~ {
+    //~ size_t i;
 
-    B = clog2(k+1) + 1;
-    if (m*B > W) {
-        fprintf(stderr, "need m*B=%lu > %d=W bits\n", (unsigned long)(m*B), W);
-        exit(42);
-    }
+    //~ B = clog2(k+1) + 1;
+    //~ if (m*B > W) {
+        //~ fprintf(stderr, "need m*B=%lu > %d=W bits\n", (unsigned long)(m*B), W);
+        //~ exit(42);
+    //~ }
 
-    lim = (word)k << (m-1)*B;
-    ovmask = 0;
-    for (i = 1; i <= m; i++)
-        ovmask = (ovmask << B) | ((word)1 << (B-1));
-    lim += (word)1 << (m-1)*B;
-    for (i=0; i < 256; i++) T[i] = ovmask >> (B-1);
-    for (i = 1; *pat != '\0'; i <<= B) {
-        T[*pat] &= ~i;
-        pat++;
-    }
+    //~ lim = (word)k << (m-1)*B;
+    //~ ovmask = 0;
+    //~ for (i = 1; i <= m; i++)
+        //~ ovmask = (ovmask << B) | ((word)1 << (B-1));
+    //~ lim += (word)1 << (m-1)*B;
+    //~ for (i=0; i < 256; i++) T[i] = ovmask >> (B-1);
+    //~ for (i = 1; *pat != '\0'; i <<= B) {
+        //~ T[*pat] &= ~i;
+        //~ pat++;
+    //~ }
 
-    MASK = (m*B == W) ? ~(word)0 : i-1;
-}
+    //~ MASK = (m*B == W) ? ~(word)0 : i-1;
+//~ }
 
-size_t exec(unsigned char *text, size_t n, PartAutom *M)
+size_t execSA(unsigned char *text, size_t n, PartAutom *M)
 {
     word state, overflow;
     size_t i, occ = 0;
@@ -179,11 +179,6 @@ size_t exec(unsigned char *text, size_t n, PartAutom *M)
 
     return occ;
 }
-
-
-
-
-
 
 #define DEBUG 0
 
@@ -216,7 +211,7 @@ printbin(A->TSA['b']);
 	
 	//~ prep("aaaa",4,k);
 	
-	count = exec(text+from, to-from, A); //creo que el +1 sobra
+	count = execSA(text+from, to-from, A); //creo que el +1 sobra
 	//~ printf("count: %d\n",count);
 	return count;
 }

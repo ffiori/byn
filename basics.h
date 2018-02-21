@@ -26,9 +26,9 @@ typedef unsigned char uchar;
 
 uchar Map[Sigma];               /* character mapping */
 
-void *mymalloc (int n);
+void *mymalloc (size_t n);
 void myfree (void *p);
-void *myrealloc (void *p, int n);
+void *myrealloc (void *p, size_t n);
 
 #define malloc(n) mymalloc(n)
 #define free(p) myfree(p)
