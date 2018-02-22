@@ -6,6 +6,8 @@
 
 #include "autom.h"
 
+#define max(a,b) ((a)<(b) ? (b) : (a))
+
 void printbin(mask x, int pos)
 {
 	if(pos<=0) {return;}
@@ -22,6 +24,7 @@ void printbin(mask x, int pos)
 
 int searchFAutom (PartAutom * A, register uchar * text, int from, int to, int *matches)
 {
+	puts("WARNING! Entering old searchFAutom...");
     register mask x;
     register mask D = A->D.d0;
     register mask Din = A->Din;
@@ -78,6 +81,7 @@ int searchFAutom (PartAutom * A, register uchar * text, int from, int to, int *m
 
 int searchAutom (PartAutom * A, register uchar * text, int from, int to, int *matches)
 {
+	puts("WARNING! Entering old searchAutom...");
     register mask x;
     register mask *T = A->T.d1[0];
     register mask D = A->D.d0;
@@ -118,45 +122,11 @@ int searchAutom (PartAutom * A, register uchar * text, int from, int to, int *ma
 }
 
 
-
-
 typedef unsigned long word;
 #define W (8 * (int)sizeof(word))
 
 static int B; /* number of bits per state */
 static word lim, ovmask, MASK, T[256];
-
-//~ /* ceil(log2(x)) */
-//~ int clog2(size_t x)
-//~ {
-    //~ int i;
-    //~ for (i = 0; ((size_t)1 << i) < x; i++);
-    //~ return i;
-//~ }
-
-//~ void prep(unsigned char *pat, size_t m, size_t k)
-//~ {
-    //~ size_t i;
-
-    //~ B = clog2(k+1) + 1;
-    //~ if (m*B > W) {
-        //~ fprintf(stderr, "need m*B=%lu > %d=W bits\n", (unsigned long)(m*B), W);
-        //~ exit(42);
-    //~ }
-
-    //~ lim = (word)k << (m-1)*B;
-    //~ ovmask = 0;
-    //~ for (i = 1; i <= m; i++)
-        //~ ovmask = (ovmask << B) | ((word)1 << (B-1));
-    //~ lim += (word)1 << (m-1)*B;
-    //~ for (i=0; i < 256; i++) T[i] = ovmask >> (B-1);
-    //~ for (i = 1; *pat != '\0'; i <<= B) {
-        //~ T[*pat] &= ~i;
-        //~ pat++;
-    //~ }
-
-    //~ MASK = (m*B == W) ? ~(word)0 : i-1;
-//~ }
 
 size_t execSA(unsigned char *text, size_t n, PartAutom *M)
 {
@@ -184,34 +154,32 @@ size_t execSA(unsigned char *text, size_t n, PartAutom *M)
 
 int searchVAutom (PartAutom * A, register uchar * text, int from, int to, int *matches)
 {
-    register mask x;
+    //~ register mask x;
     //~ register mask *T = A->T.d1[0]; //T['a']=0, T[otra cosa]=219
-    register mask D = A->D.d0;
-    register mask Din = A->Din;
-    register mask m2 = A->msk[2]; // 0..0(1)^(k+1)
-    register mask m1 = A->msk[1]; // 0..010..010...
-    register mask m3 = m1 | m2; //no se usa
-    register mask G = A->Glast.d0; //OK 1<<k
-    register int p0 = A->p[0]; //OK = k+2
-    register int p3 = A->p[3]; //no se usa
-    register int n = from;
-    int count = 0;
-    
-	//~ int k = p0-2; //WTF
-		
+    //~ register mask D = A->D.d0;
+    //~ register mask Din = A->Din;
+    //~ register mask m2 = A->msk[2]; // 0..0(1)^(k+1)
+    //~ register mask m1 = A->msk[1]; // 0..010..010...
+    //~ register mask m3 = m1 | m2; //no se usa
+    //~ register mask G = A->Glast.d0; //OK 1<<k
+    //~ register int p0 = A->p[0]; //OK = k+2
+    //~ register int p3 = A->p[3]; //no se usa
+    //~ register int n = from;
+	//~ int k = p0-2; //WTF Fernando	
 #if DEBUG
 printf("searchVAutom() from %d to %d. diff %d. p0: %d, G: %d\n",from,to,to-from,p0,G);
-//~ printf("m1: "); printbin(m1);
-//~ printf("m2: "); printbin(m2);
 printbin(A->MASK);
 printbin(A->ovmask);
 printbin(A->TSA['a']);
 printbin(A->TSA['b']);
 #endif
 	
-	//~ prep("aaaa",4,k);
+	int count = 0;
 	
-	count = execSA(text+from, to-from, A); //creo que el +1 sobra
+	from = max(0,from);
+	to = max(from,to);
+	
+	count = execSA(text+from, to-from, A);
 	//~ printf("count: %d\n",count);
 	return count;
 }

@@ -1,6 +1,7 @@
 #include	<stdio.h>
 #include	<stdlib.h>
 #include	<string.h>
+#include 	"search.c"
 #define		NTIME		1000
 
 #define MAXT 8123456
@@ -9,6 +10,8 @@
 
 #define buf (buf_arr+ROOM)		//text
 #define wbuf (wbuf_arr+ROOM)	//patterns	
+
+typedef unsigned long word;
 
 char buf_arr[MAXT]; //text
 char wbuf_arr[MAXP]; //patterns
@@ -63,33 +66,43 @@ main(argc, argv)
 		case '%':	percent = 1; break;
 		default:	goto usage;
 		}
+		
 	if((optind >= argc) || (optind+2 < argc)){
 usage:
 		fprintf(stderr, "usage: %s [-k mismatches] [-S sigma] [-e nex] [-p npp] <string_of_patterns> text_file\n", argv[0]);
 		exit(1);
 	}
+	
 	if((c = open(argv[argc-1], 0)) < 0){
 		perror(argv[argc-1]);
 		exit(1);
 	}
 	nbuf = read(c, buf, MAXT-ROOM-1025);
 	close(c);
+	
 	if(optind+2 == argc){
 		te = strlen(argv[optind]);
 		strcpy(wbuf, argv[optind]);
 		wbuf[te+1] = 0;
 	} else {
 		s = wbuf;
-		
-		while((c = getchar()) != EOF) *s++ = c; //~ *s++ = (c=='\n') ? 0 : c; //changed because BYN needs them separated by \n
+		for(s = wbuf; (c = getchar()) != EOF; s++) *s = c; //~ *s++ = (c=='\n') ? 0 : c; //changed because BYN needs them separated by \n
 		totlen = s - wbuf; //total length of patterns file
 		*s = 0;
 	}
+	
 	tp = te = 0;
 	nf = nw = 0;
 	int Plen=0;
-	for(s = wbuf; *s!=0; ++s) ++Plen;
+	for(s = wbuf; *s!=0 && *s!='\n'; ++s) ++Plen;
 	nw = (totlen+1) / (Plen+1); //len+1 in case last pattern finishes in '\0' instead of '\n'
+	
+	printf("Error: Automaton won't fit in a w=%d bits word. It must be m <= w/ceil(log2(k+1)+1), and here m=%d and k=%d\n", sizeof(word)*8,Plen,kval);
+	if(Plen > sizeof(word)*8 / (clog2(kval+1)+1)){
+		printf("Error: Automaton won't fit in a w=%d bits word. It must be m <= w/ceil(log2(k+1)+1), and here m=%d and k=%d\n", sizeof(word)*8,Plen,kval);
+		exit(1);
+	}
+	
 	for(s = wbuf; *s;){ //executes preprocessing and search for each pattern.
 		int i;
 		//nw++;
@@ -126,7 +139,7 @@ usage:
 		//search
 		startclock();
 		for(c = 0; c < nexec; c++){
-			if(cnt = exec(buf+1, nbuf, kval, sigma))
+			if(cnt = exec(buf, nbuf, kval, sigma))
 				nmatched++;
 			nf += cnt;
 		}
@@ -137,6 +150,7 @@ usage:
 
 		break; //written by Fernando because I want to test multiple pattern matching.
 	}
+	
 	//printf("alg=%s\tnp=%d\tmatch=%d\tp=%.4fs(%d/%d)\te=%.4fs(%d/%d)\n",
 	if(nexec==0) nexec=1;
 	printf("alg=%-20s np=%-5d match=%-10d p=%.5fs e=%.5fs total=%.5fs\n",

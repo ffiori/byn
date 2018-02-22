@@ -30,10 +30,10 @@ int searchFPartAutomH1c (PartAutom * M, uchar * text, int from, int to, int *mat
 int searchVPartAutomH1c (PartAutom * M, uchar * text, int from, int to, int *matches);
 int searchXPartAutomH1c (PartAutom * M, uchar * text, int from, int to, int *matches);
 
-        /* to force a decision externally */
-
+        /* to force a decision externally, all false originally*/
+        
 bool pautomForceHoriz = false;
-bool pautomForceVert = false;
+bool pautomForceVert = true;
 bool dontuseSForce = false;
 bool useSForce = false;
 bool pautomForceActive = false;
@@ -429,6 +429,10 @@ void prepSPartAutom (PartAutom * M, uchar ** pattern, int np, int k, int c, bool
             //, printf("5 V %d, dontuseSForce %d\n",V,dontuseSForce)
             ;
 
+	if(M->search != searchVAutom){
+		puts("WARNING! Forced by Fernando.");
+		M->search = searchVAutom;
+	}
 }
 
 void prepPartAutom (PartAutom * M, uchar * pattern, int m, int k, int c, bool V)

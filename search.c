@@ -6,7 +6,7 @@
 
 #include "partexact.h"
 #include "countcode.c"
-#include "main.c"
+//~ #include "main.c"
 
 extern uchar Map[256];
 
