@@ -96,8 +96,8 @@ usage:
 	int Plen=0;
 	for(s = wbuf; *s!=0 && *s!='\n'; ++s) ++Plen;
 	nw = (totlen+1) / (Plen+1); //len+1 in case last pattern finishes in '\0' instead of '\n'
-	
-	printf("Error: Automaton won't fit in a w=%d bits word. It must be m <= w/ceil(log2(k+1)+1), and here m=%d and k=%d\n", sizeof(word)*8,Plen,kval);
+
+	//TODO make it work in all the cases when it doesn't enter the if!
 	if(Plen > sizeof(word)*8 / (clog2(kval+1)+1)){
 		printf("Error: Automaton won't fit in a w=%d bits word. It must be m <= w/ceil(log2(k+1)+1), and here m=%d and k=%d\n", sizeof(word)*8,Plen,kval);
 		exit(1);

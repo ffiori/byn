@@ -1,12 +1,15 @@
 CC	= gcc 
 
-FLAGS	= -g3 #-pipe -Dbitvector=unsigned -finline-functions -ffast-math -fpeephole -funroll-loops -fomit-frame-pointer -O3
+FLAGS	= sys/386.c -pipe -Dbitvector=unsigned -finline-functions -ffast-math -fpeephole -funroll-loops -fomit-frame-pointer -O3
 
-exactp: search.o lsearch
-	$(CC) $(FLAGS) -o exactp search.o lsearch -lm
+exactp: main.o lsearch
+	$(CC) $(FLAGS) -o exactp main.o lsearch -lm
 
-search.o: search.c 
-	$(CC) $(FLAGS) -c search.c
+main.o: main.c search.c
+	$(CC) $(FLAGS) -c main.c
+
+#~ search.o: search.c
+#~ 	$(CC) $(FLAGS) -c search.c 
 
 all: lsearch
 	echo ok
